@@ -22,7 +22,7 @@ func Do(db *bolt.DB, s3Bucket *s3.S3, bucketname string) error {
 			Body:                 bytes.NewReader(b.Bytes()),
 			ACL:                  aws.String("authenticated-read"),
 			ServerSideEncryption: aws.String("AES256"),
-			Metadata: &map[string]*string{
+			Metadata: map[string]*string{
 				"bolt-backup": aws.String(backupdate.Format("2006/01/02/15:04:05")),
 			},
 		}
