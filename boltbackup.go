@@ -11,7 +11,7 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-func Do(db *bolt.DB, s3Bucket *s3.S3, bucketname string) error {
+func Do(db *bolt.DB, s3Bucket *s3.S3, prefix string, bucketname string) error {
 	err := db.View(func(tx *bolt.Tx) error {
 		var b bytes.Buffer
 		buffInMem := bufio.NewWriter(&b)
@@ -19,7 +19,7 @@ func Do(db *bolt.DB, s3Bucket *s3.S3, bucketname string) error {
 		backupdate := time.Now()
 		params := &s3.PutObjectInput{
 			Bucket: aws.String(bucketname),
-			Key: aws.String(fmt.Sprintf("/backup/%s",
+			Key: aws.String(fmt.Sprintf("/%s/%s", prefix,
 				backupdate.Format("2006_01_02_15-04-05"))),
 			Body:                 bytes.NewReader(b.Bytes()),
 			ACL:                  aws.String("authenticated-read"),
@@ -36,7 +36,7 @@ func Do(db *bolt.DB, s3Bucket *s3.S3, bucketname string) error {
 		// write latest
 		params = &s3.PutObjectInput{
 			Bucket:               aws.String(bucketname),
-			Key:                  aws.String("/backup/latest"),
+			Key:                  aws.String(fmt.Sprintf("/%s/latest", prefix)),
 			Body:                 bytes.NewReader(b.Bytes()),
 			ACL:                  aws.String("authenticated-read"),
 			ServerSideEncryption: aws.String("AES256"),
